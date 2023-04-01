@@ -25,14 +25,11 @@ fn print_results(results: (String, String)) {
 ///
 fn main() {
     let (year, day, input_file_path) = args::extract();
-
-    println!("\nStarting with year {year} day {day} ...");
     let results: (String, String) = match year {
         2020 => year_2020::solve_challenge(day, input_file_path),
         2022 => year_2022::solve_challenge(day, input_file_path),
         _ => panic!("\nSolutions to challenges not implemented for this year!\n"),
     };
-
     print_results(results);
 }
 

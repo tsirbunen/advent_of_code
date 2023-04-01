@@ -1,75 +1,104 @@
-// use std::collections::HashMap;
-// use std::collections::HashSet;
-// use std::fs;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Lines;
 
-// fn read_input_file_contents(file_path: String) -> String {
-//     let result = fs::read_to_string(file_path);
-//     let contents: String = match result {
-//         Err(e) => panic!("Error in reading input file: {e}"),
-//         Ok(data) => data,
-//     };
-//     contents
-// }
+fn read_input_file_lines(file_path: String) -> Lines<BufReader<File>> {
+    println!("File {:?} ", file_path);
+    let result_open = File::open(file_path);
+    let open_file = match result_open {
+        Err(e) => panic!("Error opening input file: {e}"),
+        Ok(file) => file,
+    };
 
-// fn arrange_numbers_into_vector(file_contents: String) -> Vec<u32> {
-//     let numbers: Vec<u32> = file_contents
-//         .split("\n")
-//         .map(|number| number.parse::<u32>().expect("Error parsing input numbers"))
-//         .collect();
+    let buffered_reader = BufReader::new(open_file);
+    let lines = buffered_reader.lines();
+    lines
+}
 
-//     numbers
-// }
+fn update_top_three_if_warranted(max_totals: &mut Vec<u32>, current_elf_total_calories: &mut u32) {
+    for index in 0..3 {
+        let calories = max_totals[index];
+        if *current_elf_total_calories > calories {
+            let temp = calories;
+            max_totals[index] = *current_elf_total_calories;
+            *current_elf_total_calories = temp;
+        }
+    }
+}
 
-// fn find_pair(numbers: &Vec<u32>) -> Vec<u32> {
-//     let mut unpaired: HashSet<u32> = HashSet::new();
-//     for number in numbers {
-//         let pair = 2020 - number;
-//         if unpaired.contains(&pair) {
-//             return vec![number.clone(), pair];
-//         }
-//         unpaired.insert(number.clone());
-//     }
+fn get_maximum_calories_for_top_three_elves(lines: Lines<BufReader<File>>) -> Vec<u32> {
+    let mut current_elf_total_calories: u32 = 0;
+    let mut max_totals: Vec<u32> = vec![0, 0, 0];
 
-//     panic!("Should have found a pair but didn't!");
-// }
+    for line in lines {
+        let snack_calories: u32 = match line.unwrap().parse::<u32>() {
+            Err(_e) => 0,
+            Ok(calories) => calories,
+        };
 
-// fn find_triplet(numbers: &Vec<u32>) -> Vec<u32> {
-//     let mut singles: Vec<u32> = vec![];
-//     let mut pairs: HashMap<u32, (u32, u32)> = HashMap::new();
-//     for number in numbers {
-//         let target = 2020 - number;
-//         if pairs.contains_key(&target) {
-//             let (first, second) = pairs[&target];
-//             return vec![number.clone(), first, second];
-//         };
-//         for single in &singles {
-//             let sum = single + number;
-//             pairs.insert(sum, (single.clone(), number.clone()));
-//         }
-//         singles.push(number.clone());
-//     }
-//     panic!("Should have found a triplet but didn't!");
-// }
+        if snack_calories > 0 {
+            current_elf_total_calories += snack_calories;
+            continue;
+        }
 
-// fn calculate_result(numbers: Vec<u32>) -> u32 {
-//     let mut multiplication = 1;
-//     for number in numbers {
-//         multiplication *= number;
-//     }
-//     multiplication
-// }
+        update_top_three_if_warranted(&mut max_totals, &mut current_elf_total_calories);
+        current_elf_total_calories = 0;
+    }
 
-// pub fn solve(input_file_path: String) -> (String, String) {
-//     let file_contents = read_input_file_contents(input_file_path);
-//     let numbers = arrange_numbers_into_vector(file_contents);
+    update_top_three_if_warranted(&mut max_totals, &mut current_elf_total_calories);
 
-//     // Solve part 1:
-//     let pair = find_pair(&numbers);
-//     let result_1 = calculate_result(pair);
+    max_totals
+}
 
-//     // Solve part 2:
-//     let triplet = find_triplet(&numbers);
-//     let result_2 = calculate_result(triplet);
+fn get_part_1_solution(max_totals: &Vec<u32>) -> &u32 {
+    &max_totals[0]
+}
 
-//     (result_1.to_string(), result_2.to_string())
-// }
+fn get_part_2_solution(max_totals: &Vec<u32>) -> u32 {
+    let mut sum = 0;
+    for elf_total in max_totals {
+        sum += elf_total
+    }
+    sum
+}
+
+pub fn solve(input_file_path: String) -> (String, String) {
+    let lines = read_input_file_lines(input_file_path);
+    let result = get_maximum_calories_for_top_three_elves(lines);
+
+    let result_1 = get_part_1_solution(&result);
+    let result_2 = get_part_2_solution(&result);
+
+    (result_1.to_string(), result_2.to_string())
+}
+
+#[cfg(test)]
+mod year_2022_day_1_tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case(&["dev-input.txt", "24000", "45000"])]
+    #[case(&["prod-input.txt", "71506", "209603"])]
+    fn returns_correct_answers_for_parts_1_and_2(#[case] args: &[&str; 3]) {
+        let args: Vec<String> = args.map(String::from).to_vec();
+        let file_path = format!("src/year-2022/day-1/{}", args[0]);
+
+        let part_1_expected: String = String::from(&args[1]);
+        let part_2_expected: String = String::from(&args[2]);
+        let (part_1_result, part_2_result) = solve(file_path);
+        assert!(
+            part_1_result == part_1_expected,
+            "Expected part 1 result to be {} but got {}",
+            part_1_expected,
+            part_1_result
+        );
+        assert!(
+            part_2_result == part_2_expected,
+            "Expected part 2 result to be {} but got {}",
+            part_2_expected,
+            part_2_result
+        );
+    }
+}

@@ -77,17 +77,29 @@ pub fn solve(input_file_path: String) -> (String, String) {
 #[cfg(test)]
 mod year_2020_day_1_tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn returns_correct_dev_answer() {
-        let file_path: String = String::from("src/year-2020/day-1/dev-input.txt");
-        let dev_expected_result: String = String::from("514579");
-        let (dev_result, _prod_result) = solve(file_path);
+    #[rstest]
+    #[case(&["dev-input.txt", "514579", "241861950"])]
+    #[case(&["prod-input.txt", "365619", "236873508"])]
+    fn returns_correct_answers_for_parts_1_and_2(#[case] args: &[&str; 3]) {
+        let args: Vec<String> = args.map(String::from).to_vec();
+        let file_path = format!("src/year-2020/day-1/{}", args[0]);
+
+        let part_1_expected: String = String::from(&args[1]);
+        let part_2_expected: String = String::from(&args[2]);
+        let (part_1_result, part_2_result) = solve(file_path);
         assert!(
-            dev_result == dev_expected_result,
-            "Expected dev result to be {} but got {}",
-            dev_expected_result,
-            dev_result
+            part_1_result == part_1_expected,
+            "Expected part 1 result to be {} but got {}",
+            part_1_expected,
+            part_1_result
+        );
+        assert!(
+            part_2_result == part_2_expected,
+            "Expected part 2 result to be {} but got {}",
+            part_2_expected,
+            part_2_result
         );
     }
 }

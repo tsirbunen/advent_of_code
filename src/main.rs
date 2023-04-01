@@ -37,7 +37,7 @@ fn main() {
 }
 
 #[cfg(test)]
-mod tests {
+mod main_tests {
     use rstest::rstest;
     use std::process::Command;
 

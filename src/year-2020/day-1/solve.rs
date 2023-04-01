@@ -73,3 +73,21 @@ pub fn solve(input_file_path: String) -> (String, String) {
 
     (result_1.to_string(), result_2.to_string())
 }
+
+#[cfg(test)]
+mod year_2020_day_1_tests {
+    use super::*;
+
+    #[test]
+    fn returns_correct_dev_answer() {
+        let file_path: String = String::from("src/year-2020/day-1/dev-input.txt");
+        let dev_expected_result: String = String::from("514579");
+        let (dev_result, _prod_result) = solve(file_path);
+        assert!(
+            dev_result == dev_expected_result,
+            "Expected dev result to be {} but got {}",
+            dev_expected_result,
+            dev_result
+        );
+    }
+}

@@ -62,26 +62,82 @@ pub fn extract() -> (u16, String, String) {
     (year, day.to_string(), input_file_path)
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod args_tests {
+    use super::*;
+    use rstest::rstest;
 
-//     #[test]
-//     fn extracts_correct_day_from_args() {
-//         let args_mock = vec![
-//             String::from("target/debug/advent_of_code"),
-//             String::from("2020"),
-//             String::from("5"),
-//             String::from("dev"),
-//         ];
-//         let day = get_day(&args_mock);
-//         assert!(day == 5, "Extracted day should have been 5 but was {}", day);
-//     }
+    #[test]
+    #[should_panic(expected = "You must provide a year, a day and a mode")]
+    fn too_few_arguments_cause_panic() {
+        let args_mock = vec![String::from("target/debug/advent_of_code")];
+        validate_args_length(&args_mock);
+    }
 
-//     #[test]
-//     #[should_panic(expected = "You must provide a year, a day and a mode")]
-//     fn too_few_arguments_cause_panic() {
-//         let args_mock = vec![String::from("target/debug/advent_of_code")];
-//         validate_args_length(&args_mock);
-//     }
-// }
+    #[rstest]
+    #[case(&["path", "2020", "5", "dev"])]
+    #[case(&["path", "2020", "1", "prod"])]
+    #[case(&["path", "2022", "25", "dev"])]
+    fn extracts_correct_year(#[case] args: &[&str; 4]) {
+        let args: Vec<String> = args.map(String::from).to_vec();
+        let year = get_year(&args);
+        let year_number: u16 = args[1].parse().unwrap();
+        assert!(
+            year == year_number,
+            "Extracted year to be {} but got {}",
+            year_number,
+            year
+        );
+    }
+
+    #[rstest]
+    #[case(&["path", "2019", "1", "dev"])]
+    #[case(&["path", "2023", "25", "prod"])]
+    #[should_panic(expected = "2020 or 2022")]
+    fn out_of_range_year_causes_panic(#[case] args: &[&str; 4]) {
+        let args: Vec<String> = args.map(String::from).to_vec();
+        get_year(&args);
+    }
+
+    #[rstest]
+    #[case(&["path", "2020", "5", "dev"])]
+    #[case(&["path", "2020", "1", "prod"])]
+    #[case(&["path", "2022", "25", "dev"])]
+    fn extracts_correct_day(#[case] args: &[&str; 4]) {
+        let args: Vec<String> = args.map(String::from).to_vec();
+        let day = get_day(&args);
+        let day_number: u8 = args[2].parse().unwrap();
+        assert!(
+            day == day_number,
+            "Extracted day to be {} but got {}",
+            day_number,
+            day
+        );
+    }
+
+    #[rstest]
+    #[case(&["path", "2022", "0", "dev"])]
+    #[case(&["path", "2020", "26", "prod"])]
+    #[should_panic(expected = "between 1 and 25")]
+    fn out_of_range_day_causes_panic(#[case] args: &[&str; 4]) {
+        let args: Vec<String> = args.map(String::from).to_vec();
+        get_day(&args);
+    }
+
+    #[rstest]
+    #[case(&"dev", &"dev-input.txt")]
+    #[case(&"prod", &"prod-input.txt")]
+    #[case(&"nonexisting", &"dev-input.txt")]
+    fn extracts_correct_input_file_name(#[case] input_mode: &str, #[case] expected_name: &str) {
+        let mut args: Vec<String> = ["path", "2020", "5"].map(String::from).to_vec();
+        args.push(input_mode.to_string());
+        let file_name = get_input_file_name(&args);
+        let expected_name = expected_name.to_string();
+        assert!(
+            file_name == expected_name,
+            "Extracted file name to be {} but got {}",
+            expected_name,
+            file_name
+        );
+    }
+}

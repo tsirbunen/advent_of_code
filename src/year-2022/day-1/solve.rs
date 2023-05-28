@@ -4,7 +4,6 @@ use std::io::BufReader;
 use std::io::Lines;
 
 fn read_input_file_lines(file_path: String) -> Lines<BufReader<File>> {
-    println!("File {:?} ", file_path);
     let result_open = File::open(file_path);
     let open_file = match result_open {
         Err(e) => panic!("Error opening input file: {e}"),

@@ -22,7 +22,7 @@ For example, if you want to run year **2020** and day **1** in mode **dev** , th
 The available year-day combinations can be found in the table below:
 |Year|Days|
 | :----------- | :----------- |
-|**`2020`**|1|
+|**`2020`**|1 - 2|
 |**`2022`**|1|
 
 The available modes are:
@@ -45,5 +45,7 @@ If you run the tests with **`cargo test`** (*i.e.* in parallel), it sometimes ha
 
 A single test can be run with command
 **`cargo test <test function name>`**
-Test organization follows the guidelines of the official documentation: Tests have been placed in the same files as the functions which they are testing and tests form their own module.
+
+Test organization follows the guidelines of the official documentation: Tests have been placed in the same **_files_** as the functions which they are testing and tests form their own module (even though personally I do not fancy this style).
+
 Tests are mainly unit tests. The framework **[rstest](https://crates.io/crates/rstest/0.17.0)** was selected to help with running same tests with different case scenarios. Note that 100% testing coverage has not been aimed at. 

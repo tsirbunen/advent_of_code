@@ -1,5 +1,7 @@
 #[path = "year-2020/day-1/solve.rs"]
 mod solve_01;
+#[path = "year-2020/day-2/solve.rs"]
+mod solve_02;
 
 ///
 /// Handles calling the correct day's module for solving the challenge (year 2020).
@@ -12,6 +14,7 @@ pub fn solve_challenge(day: String, input_file_path: String) -> (String, String)
 
     match day {
         1 => solve_01::solve(input_file_path),
+        2 => solve_02::solve(input_file_path),
         _ => panic!("Solution to the requested day's challenge not implemented yet!"),
     }
 }
